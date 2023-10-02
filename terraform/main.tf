@@ -154,3 +154,59 @@ resource "aws_autoscaling_attachment" "asg_attachment_bar" {
   autoscaling_group_name = aws_autoscaling_group.hello_world_asg.name
   alb_target_group_arn   = aws_lb_target_group.front_end.arn
 }
+
+# Cloud watch metrics to monitor
+# High CPU Usage on EC2
+resource "aws_cloudwatch_metric_alarm" "high_cpu" {
+  alarm_name          = "High CPU Usage"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "85"
+  alarm_description   = "This metric checks if EC2 CPU utilization exceeds 85% over two consecutive periods"
+  alarm_actions       = [aws_sns_topic.cpu_alerts.arn]
+  dimensions = {
+    InstanceId = aws_instance.my_instance.id
+  }
+}
+
+# High Latency on ALB
+resource "aws_cloudwatch_metric_alarm" "high_latency" {
+  alarm_name          = "High ALB Latency"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "TargetResponseTime"
+  namespace           = "AWS/ApplicationELB"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "0.5"
+  alarm_description   = "This metric checks if ALB latency exceeds 0.5 seconds over two consecutive periods"
+  alarm_actions       = [aws_sns_topic.latency_alerts.arn]
+  dimensions = {
+    LoadBalancer = aws_lb.my_alb.arn_suffix
+  }
+}
+
+# Setup notifications with SNS
+resource "aws_sns_topic" "cpu_alerts" {
+  name = "cpu-alerts"
+}
+
+resource "aws_sns_topic" "latency_alerts" {
+  name = "latency-alerts"
+}
+
+resource "aws_sns_topic_subscription" "cpu_notification" {
+  topic_arn = aws_sns_topic.cpu_alerts.arn
+  protocol  = "email"
+  endpoint  = "your-email@example.com"
+}
+
+resource "aws_sns_topic_subscription" "latency_notification" {
+  topic_arn = aws_sns_topic.latency_alerts.arn
+  protocol  = "email"
+  endpoint  = "your-email@example.com"
+}
