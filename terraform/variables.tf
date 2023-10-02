@@ -38,3 +38,8 @@ variable "vpc_id" {
   description = "VPC ID where resources will be deployed."
   type        = string
 }
+
+variable "image_tag" {
+  description = "The tag of the Docker image to deploy"
+  type        = string
+}

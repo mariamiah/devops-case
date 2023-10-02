@@ -79,10 +79,10 @@ resource "aws_launch_configuration" "hello_world_lc" {
               $(aws ecr get-login --no-include-email --region ${var.region})
               
               # Pull the image from ECR
-              docker pull ${aws_ecr_repository.hello_world_repository.repository_url}:IMAGE_TAG
+              docker pull ${aws_ecr_repository.hello_world_repository.repository_url}:${var.image_tag}
               
               # Run the Docker container
-              docker run -d -p 80:80 ${aws_ecr_repository.hello_world_repository.repository_url}:IMAGE_TAG
+              docker run -d -p 80:80 ${aws_ecr_repository.hello_world_repository.repository_url}:${var.image_tag}
               EOF
 
   lifecycle {

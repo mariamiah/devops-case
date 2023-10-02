@@ -6,3 +6,4 @@ max_size          = 3 # Maximum instances in ASG
 desired_capacity  = 2 # Desired instances in ASG
 subnets           = ["subnet-xxxxxxx", "subnet-yyyyyyy"] # Replace with your subnet IDs
 vpc_id            = "vpc-xxxxxxxx" # Replace with your VPC ID
+image_tag         = "latest" # This is overriden in the CI/CD pipeline by the actual commit SHA or desired tag.
