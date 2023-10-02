@@ -1,0 +1,8 @@
+region            = "us-west-2" # Change to your AWS region
+instance_type     = "t2.micro" # Change to your desired EC2 instance type
+ami_id            = "ami-xxxxxxxxxxxx" # Update with the desired AMI ID
+min_size          = 1 # Minimum instances in ASG
+max_size          = 3 # Maximum instances in ASG
+desired_capacity  = 2 # Desired instances in ASG
+subnets           = ["subnet-xxxxxxx", "subnet-yyyyyyy"] # Replace with your subnet IDs
+vpc_id            = "vpc-xxxxxxxx" # Replace with your VPC ID
