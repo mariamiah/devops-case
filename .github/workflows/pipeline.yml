@@ -1,0 +1,68 @@
+name: CI/CD Pipeline for hello-world-service
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: docker build . -t hello-world-service
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Service in Docker
+        run: docker run -it --rm -d -p 18080:80 --name hello-world-service hello-world-service
+
+      - name: Execute tests
+        run: ./tests.sh localhost:18080
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Initialization
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Set Image Tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
+
+      - name: Terraform Apply
+        run: terraform apply -var="image_tag=${{ env.IMAGE_TAG }}" -auto-approve
+
+  verify-deployment:
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: verification test
+        run: |
+          # Example verification using curl
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://deployed_service_url/)
+          if [ "$response" -ne "200" ]; then
+            echo "Deployment verification failed!"
+            exit 1
+          fi
